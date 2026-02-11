@@ -15,7 +15,7 @@ from models import MonthlyBudget, Transaction, User, db
 
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, instance_path="/tmp")
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-key-for-now")
 
@@ -36,7 +36,7 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 def get_current_cycle_start(day=8, today=None):
