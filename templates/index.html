@@ -1,88 +1,150 @@
-{% extends 'base.html' %}
-
-{% block body_class %}dashboard-page{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block body_class %}dashboard-page{% endblock %} {%
+block content %}
 <div class="glass-card">
-    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-        <h3 style="text-transform: uppercase; letter-spacing: 2px;">Status Overview</h3>
-        <div style="height: 1px; flex: 1; background: var(--glass-border);"></div>
-        <a href="{{ url_for('download_statement') }}" class="btn-secondary" style="font-size: 0.75rem;">Export PDF
-            Statement</a>
+  <div
+    style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem"
+  >
+    <h3 style="text-transform: uppercase; letter-spacing: 2px">
+      Status Overview
+    </h3>
+    <div style="height: 1px; flex: 1; background: var(--glass-border)"></div>
+    <a
+      href="{{ url_for('download_statement') }}"
+      class="btn-secondary"
+      style="font-size: 0.75rem"
+      >Export PDF Statement</a
+    >
+  </div>
+  <div class="dashboard-grid">
+    <div class="glass-card stat-card">
+      <span class="stat-label">Monthly Credit</span>
+      <div class="stat-value">₹{{ "%.2f"|format(budget.salary_credited) }}</div>
     </div>
-    <div class="dashboard-grid">
-        <div class="glass-card stat-card">
-            <span class="stat-label">Monthly Credit</span>
-            <div class="stat-value">₹{{ "%.2f"|format(budget.salary_credited) }}</div>
-        </div>
-        <div class="glass-card stat-card">
-            <span class="stat-label">Total Consumption</span>
-            <div class="stat-value danger">₹{{ "%.2f"|format(total_spent) }}</div>
-        </div>
-        <div class="glass-card stat-card">
-            <span class="stat-label">Available Reserve</span>
-            <div class="stat-value success">₹{{ "%.2f"|format(remaining_balance) }}</div>
-        </div>
+    <div class="glass-card stat-card">
+      <span class="stat-label">Total Consumption</span>
+      <div class="stat-value danger">₹{{ "%.2f"|format(total_spent) }}</div>
     </div>
+    <div class="glass-card stat-card">
+      <span class="stat-label">Available Reserve</span>
+      <div class="stat-value success">
+        ₹{{ "%.2f"|format(remaining_balance) }}
+      </div>
+    </div>
+  </div>
 
-    <div class="glass-card">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-            <h3 style="text-transform: uppercase; letter-spacing: 2px;">Data Input</h3>
-            <div style="height: 1px; flex: 1; background: var(--glass-border);"></div>
-        </div>
-        <p
-            style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">
-            Logging for cycle starting: {{ cycle_start.strftime('%d %b %Y') }}
-        </p>
-        <form action="{{ url_for('add_transaction') }}" method="POST"
-            style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 1.5rem; align-items: end;">
-            <div class="form-group" style="margin-bottom: 0;">
-                <label>Item / Purpose</label>
-                <input type="text" name="description" placeholder="IDENTIFY TARGET" required>
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-                <label>Amount (INR)</label>
-                <input type="number" step="0.01" name="amount" placeholder="0.00" required>
-            </div>
-            <button type="submit" class="btn-primary">Execute</button>
-        </form>
+  <div class="glass-card">
+    <div
+      style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem"
+    >
+      <h3 style="text-transform: uppercase; letter-spacing: 2px">Data Input</h3>
+      <div style="height: 1px; flex: 1; background: var(--glass-border)"></div>
     </div>
+    <p
+      style="
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      "
+    >
+      Logging for cycle starting: {{ cycle_start.strftime('%d %b %Y') }}
+    </p>
+    <form
+      action="{{ url_for('add_transaction') }}"
+      method="POST"
+      style="
+        display: grid;
+        grid-template-columns: 2fr 1fr auto;
+        gap: 1.5rem;
+        align-items: end;
+      "
+    >
+      <div class="form-group" style="margin-bottom: 0">
+        <label>Item / Purpose</label>
+        <input
+          type="text"
+          name="description"
+          placeholder="IDENTIFY TARGET"
+          required
+        />
+      </div>
+      <div class="form-group" style="margin-bottom: 0">
+        <label>Amount (INR)</label>
+        <input
+          type="number"
+          step="0.01"
+          name="amount"
+          placeholder="0.00"
+          required
+        />
+      </div>
+      <button type="submit" class="btn-primary">Execute</button>
+    </form>
+  </div>
 
-    <div class="glass-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <h3 style="text-transform: uppercase; letter-spacing: 2px;">Transaction Logs</h3>
-            <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">
-                Range: {{ cycle_start.strftime('%b 8') }} - Next Month 7th
-            </span>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Protocol Date</th>
-                        <th>Time Offset</th>
-                        <th>Target Description</th>
-                        <th>Amount Applied</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for t in transactions %}
-                    <tr>
-                        <td>{{ t.date.strftime('%d.%m.%Y') }}</td>
-                        <td>{{ t.time.strftime('%H:%M:%S') }}</td>
-                        <td style="font-weight: 600;">{{ t.description }}</td>
-                        <td style="color: var(--danger); font-weight: 700;">₹{{ "%.2f"|format(t.amount) }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4"
-                            style="text-align: center; color: var(--text-muted); padding: 4rem; text-transform: uppercase; letter-spacing: 2px;">
-                            No Data Detected in Current Cycle
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+  <div class="glass-card">
+    <div
+      style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      "
+    >
+      <h3 style="text-transform: uppercase; letter-spacing: 2px">
+        Transaction Logs
+      </h3>
+      <span
+        style="
+          color: var(--text-muted);
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        "
+      >
+        Range starting: {{ cycle_start.strftime('%d %b %Y') }}
+      </span>
     </div>
-    {% endblock %}
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Protocol Date</th>
+            <th>Time Offset</th>
+            <th>Target Description</th>
+            <th>Amount Applied</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in transactions %}
+          <tr>
+            <td>{{ t.date.strftime('%d.%m.%Y') }}</td>
+            <td>{{ t.time.strftime('%H:%M:%S') }}</td>
+            <td style="font-weight: 600">{{ t.description }}</td>
+            <td style="color: var(--danger); font-weight: 700">
+              ₹{{ "%.2f"|format(t.amount) }}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td
+              colspan="4"
+              style="
+                text-align: center;
+                color: var(--text-muted);
+                padding: 4rem;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+              "
+            >
+              No Data Detected in Current Cycle
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endblock %}
+</div>
